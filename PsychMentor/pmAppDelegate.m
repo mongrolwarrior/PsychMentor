@@ -16,9 +16,13 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     UISplitViewController *splitViewController = (UISplitViewController *)self.window.rootViewController;
+    splitViewController.presentsWithGesture = YES;
     UINavigationController *leftNavController = [splitViewController.viewControllers objectAtIndex:0];
     LeftViewController *leftViewController = (LeftViewController *)[leftNavController topViewController];
-    RightViewController *rightViewController = [splitViewController.viewControllers objectAtIndex:1];
+    UINavigationController *rightNavController = [splitViewController.viewControllers objectAtIndex:1];
+    RightViewController *rightViewController = (RightViewController *)[rightNavController topViewController];
+    
+//    rightViewController.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem;
     
  //   ExtendedMatchingQuestion *firstEMQ = [[leftViewController clusters] objectAtIndex:0];
     
