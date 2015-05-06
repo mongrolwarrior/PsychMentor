@@ -10,6 +10,7 @@
 #import "ExtendedMatchingQuestion.h"
 #import "EMQParser.h"
 #import "pmAppDelegate.h"
+#import "Examination.h"
 
 @interface RightViewController ()
 
@@ -115,6 +116,9 @@
     self.navigationItem.leftBarButtonItem = [self.splitViewController displayModeButtonItem];
     self.navigationItem.leftItemsSupplementBackButton = YES;
     self.navigationItem.hidesBackButton = NO;
+    
+    // SET TITLE    
+    self.title = [EMQParser currentClusterTitle];
 }
 
 

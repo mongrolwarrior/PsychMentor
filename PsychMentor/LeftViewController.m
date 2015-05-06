@@ -297,9 +297,9 @@ NSMutableArray *items;
                         [EMQParser setAdministrativeData:[NSArray arrayWithObjects:adminData[0], adminData[1],examinationIndex.eid,  @"1", @"2", nil]];
                     }
                 }
-                else                                            // eg if selected not previously selected row, make non-expanded and set current eid
+                else                                            // eg if selected not previously selected row, make expanded and set current eid
                 {
-                    [EMQParser setAdministrativeData:[NSArray arrayWithObjects:adminData[0], adminData[1], examinationIndex.eid, @"0", @"2", nil]];                }
+                    [EMQParser setAdministrativeData:[NSArray arrayWithObjects:adminData[0], adminData[1], examinationIndex.eid, @"1", @"2", nil]];                }
                 
                 [self changeListDisplay];
                 [self.leftTableView reloadData];
@@ -323,7 +323,7 @@ NSMutableArray *items;
                   //          [self.leftTableView reloadData];
                             return YES;
                         }
-                        countRows++;                // adds to counter for option
+                        countRows++;                // adds to counter for cluster within current examination
                     }
                 }
             }
@@ -407,7 +407,7 @@ NSMutableArray *items;
         int countRows = 0;
         int countExamination = 0;
         for (Examination *examinationIndex in self.examinations) {// count examinations so can set current row if switch to non-expanded
-            if (countRows == indexPath.row) {                   // found selected and it is an examination row
+            if (countRows == indexPath.row) {/*                   // found selected and it is an examination row - TABLE MODIFIED IN SHOULDPERFORMSEGUE FUNCTION ABOVE
                 if ([adminData[2] isEqualToString:examinationIndex.eid]) {                    // eg if this is the current examination
                     if ([adminData[3] isEqualToString:@"1"]) {  // eg if cluster elements are expanded, switch to non-expanded
                         [EMQParser setAdministrativeData:[NSArray arrayWithObjects:adminData[0], adminData[1], examinationIndex.eid, @"0", @"2", nil]];
@@ -425,7 +425,7 @@ NSMutableArray *items;
                 [(RightViewController *)[[segue destinationViewController] topViewController] selectedEMQ];
                 
                 [self changeListDisplay];
-                [self.leftTableView reloadData];
+                [self.leftTableView reloadData];*/
                 return;
             }
             else                                                // eg selected row not already selected
@@ -439,8 +439,10 @@ NSMutableArray *items;
                             [EMQParser setAdministrativeData:[NSArray arrayWithObjects:adminData[0], EMQIndex.CID, adminData[2], @"1", @"1", nil]];
                             // sets current examination, sets expanded to 0 (not expanded), sets index to 2 (base loadEMQ on eid)
                             
-                            [(RightViewController *)[[segue destinationViewController] topViewController] selectedEMQ];
-                           // self.splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModePrimaryHidden;
+                            RightViewController *detailVC = (RightViewController *)[[segue destinationViewController] topViewController];
+                            [detailVC selectedEMQ];
+                            detailVC.title = [EMQParser currentClusterTitle];
+                            self.splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModePrimaryHidden;
                             
                             [self changeListDisplay];
                             [self.leftTableView reloadData];
@@ -452,68 +454,6 @@ NSMutableArray *items;
             }
             countExamination++;
         }
-    }
-    else                    // eg last row selected; display results
-    {
-        NSArray *currentAdminData = [EMQParser loadAdministrativeData];
-        NSMutableString *cumulativeResults = [[NSMutableString alloc] init];
-        for (Examination *exam in self.examinations) {
-            if ([exam.eid isEqualToString:currentAdminData[2]]) {
-                [cumulativeResults appendString:[NSString stringWithFormat:@"Results for examination \'%@\' from \'%@\'\r\r", exam.Title, exam.Source]];
-                NSArray *clusterArray = exam.Clusters;
-                int countEMQ = 0;
-                int totalCountQuestions = 0;
-                int totalCountAnswered = 0;
-                int totalMarksCorrect = 0;
-                int totalMarksAnswered = 0;
-                for (ExtendedMatchingQuestion *emqIndex in clusterArray) {
-                    int countQuestions = 0;
-                    int countAnswered = 0;
-                    int marksCorrect = 0;
-                    int marksAnswered = 0;
-                    for (qaPair *questionIndex in emqIndex.questions) {
-                        int questionMarksCorrect = 0;
-                        int questionMarksAnswered = 0;
-                        int questionCountAnswered = 0;
-                        for (NSString *answeredList in questionIndex.answeredText) {
-                            if (answeredList.length>0) {   // eg don't count if there is an empty string placeholder
-                                questionCountAnswered=1;   // eg if there are any answered strings, the question has been answered
-                                if ([questionIndex.answerText containsObject:answeredList]) {
-                                    questionMarksCorrect++;
-                                }
-                                else
-                                {
-                                    questionMarksCorrect--;
-                                }
-                                if (questionMarksCorrect>[questionIndex.marks intValue]) {
-                                    questionMarksCorrect=[questionIndex.marks intValue];
-                                }
-                                if (questionMarksCorrect<0) {
-                                    questionMarksCorrect=0;
-                                }
-                                questionMarksAnswered+=[questionIndex.marks intValue];
-                            }
-                        }
-                        countAnswered+=questionCountAnswered;
-                        marksCorrect+=questionMarksCorrect;
-                        marksAnswered+=questionMarksAnswered;
-                        countQuestions++;
-                    }
-                    totalCountQuestions += countQuestions;
-                    totalCountAnswered += countAnswered;
-                    totalMarksCorrect += marksCorrect;
-                    totalMarksAnswered += marksAnswered;
-                    countEMQ++;
-                    [cumulativeResults appendString:[NSString stringWithFormat:@"Section %d: Total questions: (%d) Correct/Answered: (%d/%d)\r", countEMQ, countQuestions, marksCorrect, marksAnswered]];
-                }
-                
-                [cumulativeResults appendString:[NSString stringWithFormat:@"\rSections %d, Total questions: (%d) Correct/Answered: (%d/%d) Accuracy: %.01f%%", countEMQ, totalCountQuestions, totalMarksCorrect, totalMarksAnswered, 100.0*(float)(totalMarksCorrect)/(float)(totalMarksAnswered)]];
-            }
-        }
-        
-        UIAlertView *messageAlert = [[UIAlertView alloc] initWithTitle:@"Row Selected" message:cumulativeResults delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-        
-        [messageAlert show];
     }
     return;
 

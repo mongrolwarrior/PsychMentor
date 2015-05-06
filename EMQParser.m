@@ -142,7 +142,7 @@
     NSMutableArray *optionsToParse = [[NSMutableArray alloc] init];
     NSString *genericQuestion;
     NSMutableArray *questionsToParse = [[NSMutableArray alloc] init];
-    int sequentialQuestionNumber = [countQuestions count];
+    int sequentialQuestionNumber = (int)[countQuestions count];
     for (GDataXMLElement *emqMember in clusterArray) {
         
         // Let's fill these in!
@@ -398,7 +398,7 @@
     [xmlData writeToFile:filePath atomically:YES];
 }
 
-+ (NSArray *)clusterProperties:(NSString *)cid
+/*+ (NSArray *)clusterProperties:(NSString *)cid
 {
     
     NSString *filePath = [self dataFilePath:FALSE nameOfFile:@"EMQ"];
@@ -418,6 +418,30 @@
     NSArray *questionsArray = [questionNodes elementsForName:@"QID"];
     
     return [NSArray arrayWithObjects:cid, [NSString stringWithString:knowledgeDomain.stringValue], [NSString stringWithString:knowledgeSubDomain.stringValue], [questionsArray count], nil];
+}*/
+
++ (NSString *)currentClusterTitle
+{
+    NSArray *adminData = [EMQParser loadAdministrativeData];
+    
+    NSString *filePath = [self dataFilePath:FALSE nameOfFile:@"EMQ"];
+    NSData *xmlData = [[NSMutableData alloc] initWithContentsOfFile:filePath];
+    NSError *error;
+    GDataXMLDocument *doc = [[GDataXMLDocument alloc] initWithData:xmlData
+                                                           options:0 error:&error];
+    NSArray *examArray = [doc nodesForXPath:[NSString stringWithFormat:@"//Examinations/Examination[EID=\"%@\"]", adminData[2]] error:nil];
+    GDataXMLElement *examinationToReport = [examArray objectAtIndex:0];
+    NSArray *examSourceArray = [examinationToReport elementsForName:@"Source"];
+    GDataXMLElement *examSource = [examSourceArray objectAtIndex:0];
+    NSArray *examTitleArray = [examinationToReport elementsForName:@"Title"];
+    GDataXMLElement *examTitle = [examTitleArray objectAtIndex:0];
+    
+    NSArray *clusterArray = [doc nodesForXPath:[NSString stringWithFormat:@"//Examinations/Examination/Clusters/Cluster[CID=\"%@\"]", adminData[1]] error:nil];
+    GDataXMLElement *clusterToReport = [clusterArray objectAtIndex:0];
+    NSArray *knowledgeDomainArray = [clusterToReport elementsForName:@"KnowledgeDomain"];
+    GDataXMLElement *knowledgeDomain = (GDataXMLElement *)[knowledgeDomainArray objectAtIndex:0];
+    
+    return [NSString stringWithFormat:@"%@: %@ - %@", examSource.stringValue, examTitle.stringValue, knowledgeDomain.stringValue];
 }
 
 + (void)setAdministrativeData:(NSArray *)adminData

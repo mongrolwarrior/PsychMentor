@@ -20,8 +20,9 @@
 
 + (NSArray *)loadExaminations;
 + (void)loadRemoteExaminations;
-+ (NSArray *)clusterProperties:(NSString *)cid; // returns NSArray of NSStrings describing cluster properties such as CID, KnowledgeDomain etc
+//+ (NSArray *)clusterProperties:(NSString *)cid; // returns NSArray of NSStrings describing cluster properties such as CID, KnowledgeDomain etc
 + (NSArray *)loadAdministrativeData; // returns NSArray with NSString of QID of current question and NSString of current cluster and NSString of current examination
 + (void)saveAnswers:(NSArray *)questions; // Takes NSArray of qaPairs and writes their answeredText to the xml file
 + (void)setAdministrativeData:(NSArray *)adminData; // accepts array with current question id and current examination id, and updates EMQ.xml
++ (NSString *)currentClusterTitle; // provided a cluster ID returns a string for title with the format: Source - Exam - Knowledge domain eg RANZCP - Complete Reserve Exam Paper I - Neuroscience
 @end
